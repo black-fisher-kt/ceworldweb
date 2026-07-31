@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registration & Payment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --bg:#F7F8FA;
+    --card:#FFFFFF;
+    --ink:#122031;
+    --ink-soft:#5B6B7D;
+    --trust:#1E4F6B;      /* deep trust blue */
+    --trust-dark:#123549;
+    --accent:#1E9E7C;     /* confirm green */
+    --accent-soft:#E4F6F0;
+    --line:#E4E8ED;
+    --radius:18px;
+    --shadow:0 20px 50px -20px rgba(18,32,49,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 500px at 15% -10%, #EAF2F6 0%, transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, #EFF7F3 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  h1,h2,h3,.display{font-family:'Sora',sans-serif;}
+
+  /* ---------- NAV / TRUST BAR ---------- */
+  .topbar{
+    width:100%;
+    padding:18px 24px;
+    display:flex;
+    justify-content:center;
+    border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,0.7);
+    backdrop-filter:blur(6px);
+  }
+  .topbar-inner{
+    width:100%;
+    max-width:1040px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Sora',sans-serif;
+    font-weight:700;
+    font-size:18px;
+    color:var(--trust-dark);
+  }
+  .brand-mark{
+    width:30px;height:30px;border-radius:9px;
+    background:linear-gradient(135deg,var(--trust),var(--accent));
+    display:flex;align-items:center;justify-content:center;
+  }
+  .brand-mark svg{width:16px;height:16px;stroke:#fff;}
+  .badge-row{display:flex;gap:18px;}
+  .mini-badge{
+    display:flex;align-items:center;gap:6px;
+    font-size:12.5px;color:var(--ink-soft);font-weight:500;
+  }
+  .mini-badge svg{width:14px;height:14px;stroke:var(--accent);flex-shrink:0;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    width:100%;
+    max-width:720px;
+    padding:72px 24px 40px;
+    text-align:center;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:12.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--trust);
+    background:var(--accent-soft);
+    padding:7px 14px;border-radius:100px;
+    margin-bottom:22px;
+  }
+  .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+  .hero h1{
+    font-size:42px;
+    line-height:1.15;
+    font-weight:800;
+    color:var(--ink);
+    margin:0 0 16px;
+    letter-spacing:-0.02em;
+  }
+  .hero p{
+    font-size:16.5px;
+    color:var(--ink-soft);
+    line-height:1.6;
+    max-width:520px;
+    margin:0 auto 34px;
+  }
+  .cta-btn{
+    appearance:none;border:none;cursor:pointer;
+    background:linear-gradient(135deg,var(--trust),var(--trust-dark));
+    color:#fff;
+    font-family:'Sora',sans-serif;
+    font-weight:600;
+    font-size:16px;
+    padding:16px 34px;
+    border-radius:100px;
+    box-shadow:0 14px 30px -10px rgba(30,79,107,0.55);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .cta-btn:hover{transform:translateY(-2px);box-shadow:0 18px 34px -8px rgba(30,79,107,0.6);}
+  .cta-btn:focus-visible{outline:3px solid var(--accent);outline-offset:3px;}
+
+  .trust-strip{
+    display:flex;justify-content:center;gap:28px;flex-wrap:wrap;
+    margin-top:38px;padding-top:28px;border-top:1px solid var(--line);
+  }
+  .trust-item{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink-soft);font-weight:500;}
+  .trust-item svg{width:16px;height:16px;stroke:var(--trust);}
+
+  /* ---------- WIZARD CARD ---------- */
+  .wizard-wrap{
+    width:100%;max-width:520px;
+    padding:0 20px 80px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    border:1px solid var(--line);
+    padding:36px 32px;
+    display:none;
+    animation:fadeUp .35s ease;
+  }
+  .card.active{display:block;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+  .steps{
+    display:flex;align-items:center;gap:8px;margin-bottom:28px;
+  }
+  .step-dot{
+    width:28px;height:28px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;font-family:'Sora',sans-serif;
+    background:var(--line);color:var(--ink-soft);
+    flex-shrink:0;
+  }
+  .step-dot.done{background:var(--accent);color:#fff;}
+  .step-dot.now{background:var(--trust);color:#fff;}
+  .step-line{flex:1;height:2px;background:var(--line);}
+  .step-line.done{background:var(--accent);}
+
+  .card h2{
+    font-size:22px;font-weight:700;margin:0 0 6px;color:var(--ink);
+  }
+  .card .sub{
+    font-size:13.5px;color:var(--ink-soft);margin:0 0 26px;
+  }
+
+  .field{margin-bottom:18px;}
+  .field label{
+    display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:7px;
+  }
+  select, input[type=text], input[type=number]{
+    width:100%;
+    padding:13px 14px;
+    border-radius:11px;
+    border:1.5px solid var(--line);
+    background:#FCFDFE;
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  select:focus, input:focus{
+    outline:none;border-color:var(--trust);box-shadow:0 0 0 4px rgba(30,79,107,0.12);
+  }
+  .amount-wrap{position:relative;}
+  .amount-wrap .rupee{
+    position:absolute;left:14px;top:50%;transform:translateY(-50%);
+    color:var(--ink-soft);font-weight:600;font-size:14.5px;
+  }
+  .amount-wrap input{padding-left:30px;}
+
+  .notes-box{
+    background:var(--accent-soft);
+    border:1px solid #CFEBE0;
+    border-radius:12px;
+    padding:16px 18px;
+    margin:22px 0 26px;
+  }
+  .notes-box .notes-title{
+    font-size:12.5px;font-weight:700;color:var(--trust-dark);
+    text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;
+  }
+  .notes-box ul{margin:0;padding-left:18px;}
+  .notes-box li{font-size:13px;color:var(--ink-soft);margin-bottom:6px;line-height:1.5;}
+  .notes-box li:last-child{margin-bottom:0;}
+
+  .primary-btn{
+    width:100%;
+    appearance:none;border:none;cursor:pointer;
+    background:var(--trust);color:#fff;
+    font-family:'Sora',sans-serif;font-weight:600;font-size:15px;
+    padding:14px;border-radius:11px;
+    transition:background .15s ease, transform .15s ease;
+  }
+  .primary-btn:hover:not(:disabled){background:var(--trust-dark);transform:translateY(-1px);}
+  .primary-btn:disabled{opacity:.45;cursor:not-allowed;}
+  .primary-btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px;}
+
+  .hint{font-size:12px;color:var(--ink-soft);margin-top:10px;text-align:center;}
+
+  /* Step 3 - QR / payment */
+  .amount-display{
+    text-align:center;
+    background:linear-gradient(135deg,var(--trust),var(--trust-dark));
+    border-radius:14px;
+    padding:20px;
+    color:#fff;
+    margin-bottom:22px;
+  }
+  .amount-display .lbl{font-size:12px;opacity:.8;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px;}
+  .amount-display .val{font-size:30px;font-weight:800;font-family:'Sora',sans-serif;}
+
+  .qr-frame{
+    display:flex;justify-content:center;margin:6px 0 14px;
+  }
+  .qr-inner{
+    padding:16px;background:#fff;border:1.5px solid var(--line);border-radius:16px;
+    box-shadow:0 10px 24px -12px rgba(18,32,49,0.15);
+  }
+  .upi-id{
+    text-align:center;font-size:13.5px;color:var(--ink-soft);margin-bottom:22px;
+  }
+  .upi-id b{color:var(--ink);font-weight:700;}
+
+  .timer-wrap{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    margin-bottom:22px;
+  }
+  .timer-ring{
+    width:20px;height:20px;border-radius:50%;
+    border:3px solid var(--line);border-top-color:var(--trust);
+    animation:spin 1s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .timer-text{font-size:13.5px;color:var(--ink-soft);font-weight:500;}
+  .timer-text b{color:var(--trust);font-variant-numeric:tabular-nums;}
+
+  #paidBtnWrap{display:none;animation:fadeUp .35s ease;}
+
+  /* Step 4 thank you */
+  .thanks-icon{
+    width:64px;height:64px;border-radius:50%;
+    background:var(--accent-soft);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 20px;
+  }
+  .thanks-icon svg{width:30px;height:30px;stroke:var(--accent);}
+  .card.thanks{text-align:center;}
+  .summary-box{
+    background:#FAFBFC;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;margin:22px 0;text-align:left;
+  }
+  .summary-row{display:flex;justify-content:space-between;font-size:13.5px;padding:6px 0;}
+  .summary-row span:first-child{color:var(--ink-soft);}
+  .summary-row span:last-child{font-weight:600;color:var(--ink);}
+  .detail-line{font-size:13.5px;color:var(--ink-soft);line-height:1.6;margin:4px 0;}
+
+  @media (max-width:480px){
+    .hero h1{font-size:32px;}
+    .card{padding:28px 22px;}
+    .badge-row{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ TOP TRUST BAR ============ -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-4z"/></svg>
+      </span>
+      CEW
+    </div>
+    <div class="badge-row">
+      <div class="mini-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Secure
+      </div>
+      <div class="mini-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        Verified
+      </div>
+      <div class="mini-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13H11l-1 9L20 10h-6.5L13 2z"/></svg>
+        Instant
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="eyebrow"><span class="eyebrow-dot"></span>Most Trusted</div>
+  <h1>Fastest Crypto Exchange World</h1>
+  <p>Fill in your details, choose your (wallet, coin, deposit address), and confirm your payment securely — the whole process takes less than two minutes.</p>
+  <button class="cta-btn" id="startBtn" onclick="goToStep(1)">Get Started</button>
+
+  <div class="trust-strip">
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      100% secure process
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      Takes under 2 minutes
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      Instant confirmation
+    </div>
+  </div>
+</section>
+
+<!-- ============ WIZARD ============ -->
+<div class="wizard-wrap">
+
+  <!-- shared step indicator, injected once per card via JS-free duplication -->
+
+  <!-- STEP 1 -->
+  <div class="card" id="step1">
+    <div class="steps">
+      <div class="step-dot now">1</div><div class="step-line"></div>
+      <div class="step-dot">2</div><div class="step-line"></div>
+      <div class="step-dot">3</div><div class="step-line"></div>
+      <div class="step-dot">4</div>
+    </div>
+    <h2>Tell us a bit about you</h2>
+    <p class="sub">Choose the options that apply — this helps us set things up correctly.</p>
+
+    <div class="field">
+      <label for="f1">Wallet</label>
+      <select id="f1" onchange="checkStep1()">
+        <option value="">Select an option</option>
+        <option>Binance</option>
+        <option>Exodus</option>
+        <option>CoinDCX</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="f2">Coin</label>
+      <select id="f2" onchange="checkStep1()">
+        <option value="">Select an option</option>
+        <option>USDT</option>
+        <option>WLD</option>
+        <option>BTC</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="f3">Fill Your Deposit address (Network must be BSC-bnb smart chain)</label>
+      <select id="f3" onchange="handleF3Change()">
+        <option value=""></option>
+        <option value="__other__">Click here</option>
+      </select>
+    </div>
+    <div class="field" id="f3OtherWrap" style="display:none;">
+      <label for="f3Other">Put your deposit address here</label>
+      <input type="text" id="f3Other" placeholder="Paste here" oninput="checkStep1()">
+    </div>
+
+    <p class="hint">Fill all three fields to continue — you'll move to the next step automatically.</p>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card" id="step2">
+    <div class="steps">
+      <div class="step-dot done">1</div><div class="step-line done"></div>
+      <div class="step-dot now">2</div><div class="step-line"></div>
+      <div class="step-dot">3</div><div class="step-line"></div>
+      <div class="step-dot">4</div>
+    </div>
+    <h2>Amount &amp; your details</h2>
+    <p class="sub">Enter the amount to be paid and your full name.</p>
+
+    <div class="field">
+      <label for="amount">Amount (₹)</label>
+      <div class="amount-wrap">
+        <span class="rupee">₹</span>
+        <input type="number" id="amount" placeholder="Enter amount" min="1" oninput="checkStep2()">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="fullname">Full Name</label>
+      <input type="text" id="fullname" placeholder="Enter your name" oninput="checkStep2()">
+    </div>
+
+    <div class="notes-box">
+      <div class="notes-title">Please note</div>
+      <ul>
+        <li>Important note 1 — A small network fee will be deducted by your wallet ($0.1-$0.3).</li>
+        <li>Important note 2 — The amount will reflect in your wallet within a minute.</li>
+        <li>Important note 3 — Don't worry — we're secure and verified, trusted by 150+ early users.</li>
+        <li>Important note 4 — If you won't receive the funds within 24 hours, we'll refund you. contact us on Telegram <a href="https://t.me/Cewsupportbot" target="_blank">@Cewsupportbot</a></li>
+      </ul>
+    </div>
+
+    <button class="primary-btn" id="step2NextBtn" disabled onclick="goToStep(3)">Next</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="card" id="step3">
+    <div class="steps">
+      <div class="step-dot done">1</div><div class="step-line done"></div>
+      <div class="step-dot done">2</div><div class="step-line done"></div>
+      <div class="step-dot now">3</div><div class="step-line"></div>
+      <div class="step-dot">4</div>
+    </div>
+    <h2>Scan &amp; pay</h2>
+    <p class="sub">Scan the QR code below using any UPI app to complete your payment.</p>
+
+    <div class="amount-display">
+      <div class="lbl">Amount to Pay</div>
+      <div class="val" id="qrAmountText">₹0</div>
+    </div>
+
+    <div class="qr-frame"><div class="qr-inner" id="qrcode"></div></div>
+    <div class="upi-id">UPI ID: <b id="upiIdText">hyias.@axl</b></div>
+
+    <div class="timer-wrap" id="timerWrap">
+      <div class="timer-ring"></div>
+      <div class="timer-text">Please complete payment within <b id="timerCount">01:00</b></div>
+    </div>
+
+    <div id="paidBtnWrap">
+      <button class="primary-btn" onclick="goToStep(4)">My payment is done</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="card thanks" id="step4">
+    <div class="thanks-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h2>Thank you!</h2>
+    <p class="sub">We've received your submission and will confirm your payment shortly.</p>
+
+    <div class="summary-box">
+      <div class="summary-row"><span>Name</span><span id="sumName">—</span></div>
+      <div class="summary-row"><span>Amount Paid</span><span id="sumAmount">—</span></div>
+    </div>
+
+    <p class="detail-line">[Your payment is confirmed and will reflect in your wallet in less than 1 minute.]</p>
+    <p class="detail-line">[For support and queries, contact us on Telegram - <a href="https://t.me/Cewsupportbot" target="_blank">@Cewsupportbot</a>]</p>
+  </div>
+
+</div>
+
+<script>
+  // ---------- EDIT THESE FOR YOUR REAL UPI DETAILS ----------
+  const UPI_ID = "hyias.@axl";        // <-- replace with your real UPI ID
+  const PAYEE_NAME = "CEW"; // <-- replace with your business/payee name
+  // ------------------------------------------------------------
+
+  document.getElementById('upiIdText').textContent = UPI_ID;
+
+  function goToStep(n){
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('startBtn').style.display = (n===1) ? 'none' : '';
+    document.getElementById('step'+n).classList.add('active');
+    document.getElementById('step'+n).scrollIntoView({behavior:'smooth', block:'start'});
+
+    if(n===3){ startPaymentStep(); }
+    if(n===4){ fillSummary(); }
+  }
+
+  function handleF3Change(){
+    const f3 = document.getElementById('f3');
+    const wrap = document.getElementById('f3OtherWrap');
+    wrap.style.display = (f3.value === '__other__') ? 'block' : 'none';
+    checkStep1();
+  }
+
+  function checkStep1(){
+    const f1 = document.getElementById('f1').value;
+    const f2 = document.getElementById('f2').value;
+    const f3 = document.getElementById('f3').value;
+    const f3Other = document.getElementById('f3Other').value.trim();
+    const f3Filled = f3 && (f3 !== '__other__' || f3Other.length > 0);
+    if(f1 && f2 && f3Filled){
+      setTimeout(() => goToStep(2), 300);
+    }
+  }
+
+  function checkStep2(){
+    const amount = document.getElementById('amount').value;
+    const name = document.getElementById('fullname').value.trim();
+    document.getElementById('step2NextBtn').disabled = !(amount > 0 && name.length > 0);
+  }
+
+  let qrRendered = false;
+  let timerInterval = null;
+
+  function startPaymentStep(){
+    const amount = document.getElementById('amount').value || 0;
+    document.getElementById('qrAmountText').textContent = '₹' + amount;
+
+    // Build UPI payment string and render QR
+    document.getElementById('qrcode').innerHTML = '';
+    const upiString = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${encodeURIComponent(amount)}&cu=INR`;
+    new QRCode(document.getElementById('qrcode'), {
+      text: upiString,
+      width: 190,
+      height: 190,
+      colorDark: "#122031",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    // Reset & start 60s timer
+    document.getElementById('paidBtnWrap').style.display = 'none';
+    document.getElementById('timerWrap').style.display = 'flex';
+    let seconds = 60;
+    updateTimerText(seconds);
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      seconds--;
+      updateTimerText(seconds);
+      if(seconds <= 0){
+        clearInterval(timerInterval);
+        document.getElementById('timerWrap').style.display = 'none';
+        document.getElementById('paidBtnWrap').style.display = 'block';
+      }
+    }, 1000);
+  }
+
+  function updateTimerText(seconds){
+    const m = String(Math.floor(seconds/60)).padStart(2,'0');
+    const s = String(seconds%60).padStart(2,'0');
+    document.getElementById('timerCount').textContent = `${m}:${s}`;
+  }
+
+  function fillSummary(){
+    document.getElementById('sumName').textContent = document.getElementById('fullname').value || '—';
+    document.getElementById('sumAmount').textContent = '₹' + (document.getElementById('amount').value || '0');
+  }
+</script>
+</body>
+</html>
